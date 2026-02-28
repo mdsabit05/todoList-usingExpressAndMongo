@@ -20,7 +20,7 @@ async function addTodo() {
     created_at: new Date(),
     completed_at: null,
   };
-  await fetch("http://https://todolist-usingexpressandmongo-3.onrender.com/api/todos", {
+  await fetch("https://todolist-usingexpressandmongo-3.onrender.com/api/todos", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -39,7 +39,7 @@ addBtn.addEventListener("click", function (e) {
 });
 
 async function readonly() {
-  const res = await fetch("http://https://todolist-usingexpressandmongo-3.onrender.com/api/todos");
+  const res = await fetch("https://todolist-usingexpressandmongo-3.onrender.com/api/todos");
   const task = await res.json();
   populateCategories(task);
   showTask(task);
@@ -116,7 +116,7 @@ function showTask(task) {
 
 // delet button function
 async function deleteTask(id) {
-  await fetch(`http://https://todolist-usingexpressandmongo-3.onrender.com/${id}`, {
+  await fetch(`https://todolist-usingexpressandmongo-3.onrender.com/${id}`, {
     method: "DELETE",
   });
   readonly();
@@ -124,7 +124,7 @@ async function deleteTask(id) {
 
 // update function
 async function updateTask(id , data) {
-  await fetch(`http://https://todolist-usingexpressandmongo-3.onrender.com/${id}`, {
+  await fetch(`https://todolist-usingexpressandmongo-3.onrender.com/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
