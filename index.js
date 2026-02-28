@@ -116,7 +116,7 @@ function showTask(task) {
 
 // delet button function
 async function deleteTask(id) {
-  await fetch(`https://todolist-usingexpressandmongo-3.onrender.com/${id}`, {
+  await fetch(`https://todolist-usingexpressandmongo-3.onrender.com/api/todos/${id}`, {
     method: "DELETE",
   });
   readonly();
@@ -124,7 +124,7 @@ async function deleteTask(id) {
 
 // update function
 async function updateTask(id , data) {
-  await fetch(`https://todolist-usingexpressandmongo-3.onrender.com/${id}`, {
+  await fetch(`https://todolist-usingexpressandmongo-3.onrender.com/api/todos/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
