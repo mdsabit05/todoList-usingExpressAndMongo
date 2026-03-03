@@ -8,11 +8,28 @@ const allBtn = document.getElementById("allbtn");
 const pendingBtn = document.getElementById("pendingbtn");
 const completedBtn = document.getElementById("completedbtn");
 const categoryFilter = document.getElementById("categoryFilter");
+const confirmModal = document.getElementById("confirmModal");
+const confirmYes = document.getElementById("confirmYes");
+const confirmNo = document.getElementById("confirmNo");
 
-let currentFLiter = "all";
+let deleteId = null;
+// const API = "https://todolist-usingexpressandmongo-3.onrender.com/api/todos"
+const API = "http://localhost:5000/api/todos";
+let currentFilter = "all";
 let currentCategory = "all";
 
 async function addTodo() {
+  taskInput.style.border = "";
+  taskCategory.style.border = "";
+
+  if (!taskInput.value.trim()) {
+    taskInput.style.border = "2px solid red";
+    return;
+  }
+  if (!taskCategory.value.trim()) {
+    taskCategory.style.border = "2px solid red";
+    return;
+  }
   const task = {
     text: taskInput.value.trim(),
     category: taskCategory.value.trim().toLowerCase(),
@@ -20,13 +37,16 @@ async function addTodo() {
     created_at: new Date(),
     completed_at: null,
   };
-  await fetch("https://todolist-usingexpressandmongo-3.onrender.com/api/todos", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(task),
-  });
+
+  try {
+    setLoading(true);
+    await axios.post(API, task);
+  } catch (error) {
+    alert(error.response?.data?.message || "Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+
   await readonly();
   taskInput.value = "";
   taskCategory.value = "";
@@ -39,35 +59,45 @@ addBtn.addEventListener("click", function (e) {
 });
 
 async function readonly() {
-  const res = await fetch("https://todolist-usingexpressandmongo-3.onrender.com/api/todos");
-  const task = await res.json();
-  populateCategories(task);
-  showTask(task);
+  try {
+    let query = [];
+
+    if (currentFilter !== "all") {
+      query.push(`status=${currentFilter}`);
+    }
+    if (currentCategory !== "all") {
+      query.push(`category=${currentCategory}`);
+    }
+    const queryString = query.length ? "?" + query.join("&") : "";
+    const res = await axios.get(API + queryString);
+    const task = res.data;
+
+    // populateCategories(task);
+    showTask(task);
+  } catch (error) {
+    alert(error.response?.data?.message || "Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+}
+
+async function loadCategories() {
+  const res = await axios.get(API);
+  populateCategories(res.data);
 }
 readonly();
+loadCategories();
 
 function showTask(task) {
   tasklist.innerHTML = "";
 
   task.forEach((task) => {
-    // status filter
-    if (currentFLiter === "pending" && task.completed_at !== null) return;
-    if (currentFLiter === "completed" && task.completed_at === null) return;
-
-    // Search filter
     const query = searchInput.value.trim().toLowerCase();
     const matchSearch =
       task.text.toLowerCase().includes(query) ||
       task.category.toLowerCase().includes(query);
 
     if (!matchSearch) return;
-
-    // category filter
-    if (
-      currentCategory !== "all" &&
-      task.category.toLowerCase() !== currentCategory.toLowerCase()
-    )
-      return;
 
     const li = document.createElement("li");
 
@@ -76,21 +106,35 @@ function showTask(task) {
     dltbtn.textContent = "✖";
 
     dltbtn.addEventListener("click", () => {
-      deleteTask(task._id);
+      deleteId = task._id;
+confirmModal.style.display = "flex";
     });
+
+    confirmYes.addEventListener("click", async () => {
+  if (deleteId) {
+    await deleteTask(deleteId);
+    deleteId = null;
+  }
+  confirmModal.style.display = "none";
+});
+
+confirmNo.addEventListener("click", () => {
+  deleteId = null;
+  confirmModal.style.display = "none";
+});
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.checked = task.completed_at !== null;
     // checkbox click
-      checkbox.addEventListener("change", () => {
+    checkbox.addEventListener("change", () => {
       if (checkbox.checked) {
         task.completed_at = new Date();
       } else {
         task.completed_at = null;
       }
-      updateTask(task._id , {
-        completed_at : checkbox.checked ? new Date() : null
+      updateTask(task._id, {
+        completed_at: checkbox.checked ? new Date() : null,
       });
     });
 
@@ -116,32 +160,30 @@ function showTask(task) {
 
 // delet button function
 async function deleteTask(id) {
-  await fetch(`https://todolist-usingexpressandmongo-3.onrender.com/api/todos/${id}`, {
-    method: "DELETE",
-  });
+  await axios.delete(`${API}/${id}`);
   readonly();
 }
 
 // update function
-async function updateTask(id , data) {
-  await fetch(`https://todolist-usingexpressandmongo-3.onrender.com/api/todos/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-  await readonly();
+async function updateTask(id, data) {
+  try {
+    await axios.put(`${API}/${id}`, data);
+    await readonly();
+  } catch (error) {
+    console.log("Update error:", error.message);
+  }
 }
 
 allBtn.addEventListener("click", () => {
-  currentFLiter = "all";
+  currentFilter = "all";
   readonly();
 });
 pendingBtn.addEventListener("click", () => {
-  currentFLiter = "pending";
+  currentFilter = "pending";
   readonly();
 });
 completedBtn.addEventListener("click", () => {
-  currentFLiter = "completed";
+  currentFilter = "completed";
   readonly();
 });
 
@@ -187,4 +229,17 @@ function applyCategory() {
   categoryFilter.value = currentCategory;
   console.log("selected:", currentCategory);
   readonly();
+}
+
+// loading
+const loading = document.getElementById("loading");
+
+function setLoading(state) {
+  if (state) {
+    loading.style.display = "inline";
+    allBtn.disable = true;
+  } else {
+    loading.style.display = "none";
+    allBtn.disable = false;
+  }
 }

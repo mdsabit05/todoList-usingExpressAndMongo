@@ -31,6 +31,7 @@
             <input id="category" type="text" placeholder="Add category">
             <input id="date" type="date" title="Add due date">
             <button id="addbtn" type="button">+</button>
+            <div id="loading" >Loading...</div>
           </div>
         </div>
         <div class="search">
@@ -50,7 +51,16 @@
         </div>
       </div>
     </div>
+
+    <div id="confirmModal">
+  <div class="modal-content">
+    <p>Are you sure you want to delete?</p>
+    <button id="confirmYes">Yes</button>
+    <button id="confirmNo">Cancel</button>
+  </div>
+</div>
   </main>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="index.js" defer></script>
 </body>
 
