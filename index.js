@@ -14,7 +14,7 @@ const confirmNo = document.getElementById("confirmNo");
 
 let deleteId = null;
 const API = "https://todolist-usingexpressandmongo-3.onrender.com/api/todos"
-// const API = "http://localhost:5000/api/todos";
+// const API = "http://localhost:5000/api/todos"; 
 let currentFilter = "all";
 let currentCategory = "all";
 
@@ -59,7 +59,6 @@ addBtn.addEventListener("click", function (e) {
 });
 
 async function readonly() {
-  try {
     let query = [];
 
     if (currentFilter !== "all") {
@@ -68,6 +67,7 @@ async function readonly() {
     if (currentCategory !== "all") {
       query.push(`category=${currentCategory}`);
     }
+    try {
     const queryString = query.length ? "?" + query.join("&") : "";
     const res = await axios.get(API + queryString);
     const task = res.data;
@@ -188,9 +188,11 @@ completedBtn.addEventListener("click", () => {
 });
 
 // search task
-searchInput.addEventListener("input", () => {
-  readonly();
-});
+// searchInput.addEventListener("input", () => {
+//   readonly();
+// });
+
+
 
 // keys
 document.addEventListener("keydown", (e) => {
@@ -242,4 +244,23 @@ function setLoading(state) {
     loading.style.display = "none";
     allBtn.disable = false;
   }
-}
+};
+
+function throttle(func, limit) {
+  let lastCall = 0;
+
+  return function (...args) {
+    const now = Date.now();
+
+    if (now - lastCall >= limit) {
+      lastCall = now;
+      func.apply(this, args);
+    }
+  };
+};
+searchInput.addEventListener(
+  "input",
+  throttle(() => {
+    readonly();
+  }, 1000) 
+);
