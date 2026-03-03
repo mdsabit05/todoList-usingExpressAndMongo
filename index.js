@@ -13,8 +13,8 @@ const confirmYes = document.getElementById("confirmYes");
 const confirmNo = document.getElementById("confirmNo");
 
 let deleteId = null;
-// const API = "https://todolist-usingexpressandmongo-3.onrender.com/api/todos"
-const API = "http://localhost:5000/api/todos";
+const API = "https://todolist-usingexpressandmongo-3.onrender.com/api/todos"
+// const API = "http://localhost:5000/api/todos";
 let currentFilter = "all";
 let currentCategory = "all";
 
